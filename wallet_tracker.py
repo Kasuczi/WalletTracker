@@ -1,6 +1,9 @@
 import requests
 import pandas as pd
 from datetime import datetime
+import logging
+
+logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(levelname)s - %(message)s')
 
 
 class CryptoTransactionTracker:
@@ -18,6 +21,7 @@ class CryptoTransactionTracker:
             combined = pd.concat([transactions, token_transactions], ignore_index=True)
             combined['WalletAddress'] = address
             all_transactions.append(combined)
+            logging.info(f"Wallet data feached for {self.wallet_address}")
         return pd.concat(all_transactions, ignore_index=True)
 
     def fetch_eth_transactions(self):
@@ -74,13 +78,45 @@ class CryptoTransactionTracker:
         return "Unknown Token"
 
 
+class CurrentDayCryptoTransactionTracker(CryptoTransactionTracker):
+    def fetch_eth_transactions(self):
+        start_block = self.calculate_start_block_for_today()
+        url = f"https://api.etherscan.io/api?module=account&action=txlist&address={self.wallet_address}&startblock={start_block}&endblock=99999999&sort=asc&apikey={self.api_key}"
+        return self.fetch_data_from_url(url)
+
+    def fetch_token_transactions(self):
+        start_block = self.calculate_start_block_for_today()
+        url = f"https://api.etherscan.io/api?module=account&action=tokentx&address={self.wallet_address}&startblock={start_block}&endblock=99999999&sort=asc&apikey={self.api_key}"
+        return self.fetch_data_from_url(url)
+
+    def calculate_start_block_for_today(self):
+        avg_block_time = 14  # in seconds
+
+        now = datetime.utcnow()
+        midnight_utc = datetime(now.year, now.month, now.day)
+        seconds_since_midnight = (now - midnight_utc).total_seconds()
+        blocks_since_midnight = int(seconds_since_midnight / avg_block_time)
+
+        url = f"https://api.etherscan.io/api?module=proxy&action=eth_blockNumber&apikey={self.api_key}"
+        response = requests.get(url)
+        if response.status_code == 200:
+            current_block = int(response.json()['result'], 16)
+            start_block = current_block - blocks_since_midnight
+            return max(start_block, 0)
+        else:
+            logging.error("Error fetching the latest block number")
+            return 0
+
+
 if __name__ == "__main__":
-    api_key = "ETHERSCAN_API_KEY"
-    wallet_addresses = ["Wallet1",
-                        "Wallet2"]
+    api_key = ""
+    wallet_addresses = []
+
     tracker = CryptoTransactionTracker(wallet_addresses, api_key)
 
     transactions = tracker.fetch_transactions()
     combined_transactions = tracker.filter_and_label_transactions(transactions)
-    combined_transactions.to_csv(r'path_to_csv_which_is_optional.csv', sep='|', decimal=',',
-                                 index=False)
+
+    # current_day_tracker = CurrentDayCryptoTransactionTracker(wallet_addresses, api_key)
+    # current_day_transactions = current_day_tracker.fetch_transactions()
+    # current_day_combined_transactions = current_day_tracker.filter_and_label_transactions(current_day_transactions)
