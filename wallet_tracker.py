@@ -111,44 +111,13 @@ class CurrentDayCryptoTransactionTracker(CryptoTransactionTracker):
 
 
 if __name__ == "__main__":
-    api_key = "AKHAMYBR2CHS5GYRU8PYAK1S19GKAVPYD4"
-    wallet_addresses = ["0x618d6c2a6cc1aa17f411e2b2000ee00895334d87",
-                        "0x4322fd98f95a219d2aae2bba6664e3574b4c3708",
-                        "0x6400f6ebf6e958ec1887c92f30515bbad3745073",
-                        "0x4401fe38292256a2fc3b2054c44a2fae12b68ac1",
-                        "0xbba84019aeaaa8b736e1d9c7c1c6074fd47d75db",
-                        "0xa3737deca37c6d15c582309d766322bad789e6fa",
-                        "0xea55c928c2549722a21541d3b6c20d845eb28c2c",
-                        "0x8b94f9c38a6cacc49cbd48ad867c0a9c2f89eb11",
-                        "0x390a7731bb3573617c59060c6b3764664f15dada",
-                        "0x25cd302e37a69d70a6ef645daea5a7de38c66e2a",
-                        "0x618d6c2a6cc1aa17f411e2b2000ee00895334d87",
-                        "0xa2d18c5ca7170c55aed88793f1b06386d1e20a2d",
-                        "0x287e2c76aab4720786076c3deedd7dd386092050",
-                        "0x59220979d662bb96b40b5b47c5cc8939254f4d72",
-                        "0x0b6a06c07c58d13b6c725dbdb9cd1e2f6bac5527",
-                        "0x4823be7f266c5bca85b7dbd8e41f4710e1c49a7b",
-                        "0x9bcb2c3cbf1073e47f3c5c31f8ae8c7b951bb016"]
+    api_key = ""
+    wallet_addresses = []
 
     tracker = CryptoTransactionTracker(wallet_addresses, api_key)
 
     transactions = tracker.fetch_transactions()
     combined_transactions = tracker.filter_and_label_transactions(transactions)
-    combined_transactions.to_csv(r'C:\Users\janik\OneDrive\Pulpit\coingecko\wallet_tracker.csv', sep='|', decimal=',',
+    combined_transactions.to_csv(r'wallet_tracker.csv', sep='|', decimal=',',
                                  index=False)
-
-    # current_day_tracker = CurrentDayCryptoTransactionTracker(wallet_addresses, api_key)
-    # current_day_transactions = current_day_tracker.fetch_transactions()
-    # current_day_combined_transactions = current_day_tracker.filter_and_label_transactions(current_day_transactions)
-
-    # grouped = current_day_combined_transactions.groupby(['tokenSymbol', 'contractAddress', 'Type'])
-    # filtered = grouped.filter(lambda x: x['walletAddress'].nunique() >= 3)
-    # result = filtered.groupby(['tokenSymbol', 'contractAddress',  'Type']).agg({'timeStamp': 'max'}).reset_index()
-
-    # previous_data = []
-    # json_result = result.to_json(orient='records')
-    # new_records = [item for item in json_result if item not in previous_data]
-    # if new_records:
-    #     message_str = "".join(format_message(record) for record in new_records)
-    # previous_data = new_json_data
 
