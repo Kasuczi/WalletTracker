@@ -108,16 +108,3 @@ class CurrentDayCryptoTransactionTracker(CryptoTransactionTracker):
         else:
             logging.error("Error fetching the latest block number")
             return 0
-
-
-if __name__ == "__main__":
-    api_key = ""
-    wallet_addresses = []
-
-    tracker = CryptoTransactionTracker(wallet_addresses, api_key)
-
-    transactions = tracker.fetch_transactions()
-    combined_transactions = tracker.filter_and_label_transactions(transactions)
-    combined_transactions.to_csv(r'wallet_tracker.csv', sep='|', decimal=',',
-                                 index=False)
-
